@@ -1,0 +1,32 @@
+# ------------------------------------
+# 1. Local Data and Generated Artifacts
+# ------------------------------------
+# Database file (if using SQLite for local development)
+db.sqlite3
+
+# Log files created by the setup script and systemd services
+*.log
+*.pid
+
+# ------------------------------------
+# 2. Shell / System Temporary Files
+# ------------------------------------
+# Backup files created by editors (vim, nano)
+*~
+*.bak
+*.swp
+*.tmp
+
+# Temporary files created during script execution (if applicable)
+tmp/
+temp/
+
+# ------------------------------------
+# 3. Operating System and IDE Files
+# ------------------------------------
+# macOS system files
+.DS_Store
+
+# Common IDE and editor configuration directories
+.vscode/
+.idea/
