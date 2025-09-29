@@ -60,8 +60,8 @@ The Celery systemd Config Generator (available in your Canvas) is a utility desi
 
 ### Use of the Canvas UI
 Access the Generator: Open the directory with the index file
-```web/index.html
-```
+web/index.html
+
 in your Canvas environment.
 
 Input Configuration: Fill out the four required fields, ensuring the paths are accurate for your server:
