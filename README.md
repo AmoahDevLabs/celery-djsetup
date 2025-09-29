@@ -1,22 +1,24 @@
+````markdown
 # 🤖 Celery Deployment Automation Tool for Django
 
 ## 🚀 Project Overview
 
-This repository provides two essential tools for deploying Celery workers and schedulers with Django on Linux distributions that use systemd (like Fedora, Ubuntu, CentOS, etc.):
+This repository provides two essential tools for deploying Celery workers and schedulers with Django on Linux distributions that use **systemd** (like Fedora, Ubuntu, CentOS, etc.):
 
 - **setup.sh**: A robust, interactive Bash script that automatically creates, configures permissions for, and enables the necessary systemd service files on your server.
-
-- **Celery systemd Config Generator (Web UI)**: A single-file HTML/JavaScript application (which you can access via the Canvas) that allows you to visually configure and generate the exact service file content for quick testing and prototyping.
+- **Celery systemd Config Generator (Web UI)**: A single-file HTML/JavaScript application (`web/index.html`) that allows you to visually configure and generate the exact service file content for quick testing and prototyping.
 
 ## 📋 Prerequisites
 
 Before using the tools, ensure the following are configured on your server:
 
 - **Django Project**: Your project is configured for Celery tasks.
-- **Virtual Environment**: Celery and its dependencies are installed in a Python Virtual Environment (VENV).
+- **Virtual Environment (VENV)**: Celery and its dependencies are installed inside a Python virtual environment.
 - **Message Broker**: A message broker (e.g., RabbitMQ, Redis) is installed and running as a systemd service.
 
-## 🛠️ Tool 1: The Deployment Script (setup.sh)
+---
+
+## 🛠️ Tool 1: The Deployment Script (`setup.sh`)
 
 This script handles the heavy lifting of service installation and configuration.
 
@@ -24,44 +26,42 @@ This script handles the heavy lifting of service installation and configuration.
 
 1. Make the script executable:
 
-```bash
-chmod +x setup.sh
-```
+   ```bash
+   chmod +x setup.sh
+   ```
+````
 
-## Running the Deployment Script
+2. Run the deployment script interactively:
 
-To begin the automated setup process, run the script interactively:
-
-```bash
-./setup.sh
-```
+   ```bash
+   ./setup.sh
+   ```
 
 The script will prompt you for four key pieces of information:
 
-Project Name: (e.g., kuh)
+- **Project Name** (e.g., `nhwiren`)
+- **Linux User**: The non-root user that will own and run the service (e.g., `nana`)
+- **Project Path**: The full absolute path to your Django project root (e.g., `/opt/nhwiren`)
+- **VENV Path**: The full absolute path to your VENV directory (e.g., `/opt/nhwiren/.venv`)
 
-Linux User: The non-root user that will own and run the service (e.g., milch).
+### ✅ Key Actions Performed by the Script
 
-Project Path: The full absolute path to your Django project root (e.g., /opt/kuh).
+- Creates and secures log (`/var/log/celery`) and run (`/var/run/celery`) directories with correct ownership (`<LINUX_USER>`).
+- Creates **`celery-<project>.service`** and **`celerybeat-<project>.service`** files in `/etc/systemd/system/`.
+- Adds **`ExecStartPre`** steps to ensure required directories exist and permissions are fixed before service start.
+- Reloads the systemd daemon and enables the services to start on boot.
+- Optionally starts the services immediately and displays their status.
 
-VENV Path: The full absolute path to your VENV directory (e.g., /opt/kuh/.venv).
+---
 
-Key Actions Performed by the Script
-Creates and secures log (/var/log/celery) and run (/var/run/celery) directories with correct ownership (<LINUX_USER>).
+## 🖥️ Tool 2: The Web UI Config Generator (`web/index.html`)
 
-Creates celery-<project>.service and celerybeat-<project>.service files in /etc/systemd/system/.
-
-Reloads the systemd daemon and enables the services to start on boot.
-
-Optionally starts the services immediately and displays the status.
-
-## 🖥️ Tool 2: The Web UI Config Generator
-The Celery systemd Config Generator (available in your Canvas) is a utility designed to help you quickly generate and debug the exact content of the service files before deploying them.
+The Celery systemd Config Generator is a visual utility that helps you quickly generate and debug service file content before deploying.
 
 ### Use of the Canvas UI
 Access the Generator: Open the directory with the index file
-web/index.html
-
+```web/index.html
+```
 in your Canvas environment.
 
 Input Configuration: Fill out the four required fields, ensuring the paths are accurate for your server:
@@ -80,17 +80,30 @@ Select Broker: Choose either rabbitmq-server.service or redis.service (or manual
 The two large text areas at the bottom instantly update with the complete, ready-to-use [Unit] and [Service] configurations. 
 Use the Copy to Clipboard buttons to easily grab the content.
 
-### When to Use the Web UI
-Debugging: If you are unsure about the paths or arguments, use the Web UI to verify the ExecStart command before running the full setup script.
+### ✅ When to Use the Web UI
 
-### Manual Deployment: 
-If you prefer to manually create the .service files on a server, the Web UI provides the perfect source content.
+- **Debugging**: Verify the generated `ExecStart` command and environment variables before deploying.
+- **Manual Deployment**: If you prefer not to run the setup script, you can copy the generated configs and place them directly in `/etc/systemd/system/`.
 
-### 🩹 Common Deployment Issues (203/EXEC)
-During deployment on strict Linux systems (like Fedora), you may encounter the following error:
+---
 
-| Error Code | Log Message | Cause | Resolution |
-|------------|-------------|-------|------------|
-| `status=203/EXEC` | `Failed to execute /path/to/celery: Permission denied` | SELinux or Corrupted Executable. The system fails to execute the file at the kernel level. | 1. **Check Shebang**: Verify the first line of the `/path/to/.venv/bin/celery` script points to the correct Python interpreter. |
-| `status=203/EXEC` | (Error persists after checking Shebang and SELinux is permissive) | Environment/Path Mismatch. The service file or environment is missing a required path or library. | 2. **Manual Test**: Run the `ExecStart` command directly as the service user to reveal the underlying Python error: `sudo -u <user> /path/to/celery -A <project> worker` |
-| `status=203/EXEC` | (Initial failure on `/mnt/` or non-standard paths) | | |
+## 🩹 Common Deployment Issues
+
+### `status=203/EXEC` Errors
+
+| Error Code        | Log Message                                            | Cause                           | Resolution                                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status=203/EXEC` | `Failed to execute /path/to/celery: Permission denied` | SELinux or corrupted executable | 1. **Check Shebang**: Verify the first line of `/path/to/.venv/bin/celery` points to the correct Python interpreter. <br> 2. Ensure SELinux is permissive or configure policies. |
+| `status=203/EXEC` | Error persists after Shebang check                     | Environment/Path mismatch       | **Manual Test**: Run the `ExecStart` command directly as the service user: <br> `sudo -u <user> /path/to/.venv/bin/celery -A <project> worker`                                   |
+| `status=203/EXEC` | Failure on `/mnt/` or non-standard paths               | Restricted mount points         | Relocate the project/venv to a standard location such as `/opt/` or `/srv/`.                                                                                                     |
+
+---
+
+## 📌 Notes
+
+- Both tools (`setup.sh` and `web/index.html`) now include **directory safety checks** (`ExecStartPre`) to prevent failures due to missing or mis-owned log/run directories.
+- For advanced deployments, consider adding a **Flower monitoring service** (not generated by default).
+
+```
+
+```

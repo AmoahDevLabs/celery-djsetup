@@ -1,192 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Celery systemd Service Generator</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for aesthetic enhancements */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f9fb;
-        }
-        .card {
-            background-color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-        }
-        .code-area {
-            background-color: #1e293b; /* Slate 800 */
-            color: #f0fdf4; /* Emerald 50 */
-            font-family: 'Fira Code', 'Consolas', monospace;
-            min-height: 250px;
-        }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f7f9fb;
+      }
+      .card {
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
+          0 10px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+      }
+      .code-area {
+        background-color: #1e293b;
+        color: #f0fdf4;
+        font-family: "Fira Code", "Consolas", monospace;
+        min-height: 250px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="app" class="max-w-4xl mx-auto p-4 md:p-8">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-2">
-                Celery systemd Config Generator
-            </h1>
-            <p class="text-slate-600">
-                Generate unit files for your Django project based on the README template.
-            </p>
-            <p id="copy-message" class="text-sm font-semibold mt-3 text-emerald-600 opacity-0 transition-opacity duration-300">
-                Copied to clipboard!
-            </p>
-        </header>
+      <header class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-2">
+          Celery systemd Config Generator
+        </h1>
+        <p class="text-slate-600">
+          Generate unit files for your Django project with safe defaults.
+        </p>
+        <p
+          id="copy-message"
+          class="text-sm font-semibold mt-3 text-emerald-600 opacity-0 transition-opacity duration-300"
+        >
+          Copied to clipboard!
+        </p>
+      </header>
 
-        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Configuration Inputs -->
-            <section class="card p-6 rounded-xl space-y-4">
-                <h2 class="text-xl font-bold text-slate-700 border-b pb-2 mb-4">Configuration</h2>
+      <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Config Form -->
+        <section class="card p-6 rounded-xl space-y-4">
+          <h2 class="text-xl font-bold text-slate-700 border-b pb-2 mb-4">
+            Configuration
+          </h2>
 
-                <!-- Project Name -->
-                <div>
-                    <label for="projectName" class="block text-sm font-medium text-slate-700 mb-1">Project Name (e.g., kuh)</label>
-                    <input type="text" id="projectName" value="kuh" oninput="generateConfigs()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                </div>
+          <div>
+            <label
+              for="projectName"
+              class="block text-sm font-medium text-slate-700 mb-1"
+              >Project Name</label
+            >
+            <input
+              id="projectName"
+              value="nhwiren"
+              oninput="generateConfigs()"
+              class="w-full p-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label
+              for="linuxUser"
+              class="block text-sm font-medium text-slate-700 mb-1"
+              >Linux User</label
+            >
+            <input
+              id="linuxUser"
+              value="nana"
+              oninput="generateConfigs()"
+              class="w-full p-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label
+              for="projectDir"
+              class="block text-sm font-medium text-slate-700 mb-1"
+              >Project Directory</label
+            >
+            <input
+              id="projectDir"
+              value="/opt/nhwiren"
+              oninput="generateConfigs()"
+              class="w-full p-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label
+              for="venvBin"
+              class="block text-sm font-medium text-slate-700 mb-1"
+              >VENV Bin Directory</label
+            >
+            <input
+              id="venvBin"
+              value="/opt/nhwiren/.venv/bin"
+              oninput="generateConfigs()"
+              class="w-full p-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label
+              for="brokerService"
+              class="block text-sm font-medium text-slate-700 mb-1"
+              >Message Broker</label
+            >
+            <select
+              id="brokerService"
+              onchange="generateConfigs()"
+              class="w-full p-2 border rounded-lg"
+            >
+              <option value="rabbitmq-server.service">
+                rabbitmq-server.service
+              </option>
+              <option value="redis.service">redis.service</option>
+            </select>
+          </div>
+        </section>
 
-                <!-- Linux User -->
-                <div>
-                    <label for="linuxUser" class="block text-sm font-medium text-slate-700 mb-1">Linux User (e.g., milch)</label>
-                    <input type="text" id="linuxUser" value="milch" oninput="generateConfigs()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                </div>
+        <!-- Output -->
+        <section class="lg:col-span-2 space-y-8">
+          <div class="card p-6 rounded-xl">
+            <h2
+              class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between"
+            >
+              <span>celery-worker.service</span>
+              <button
+                onclick="copyToClipboard('workerConfig')"
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+              >
+                Copy
+              </button>
+            </h2>
+            <textarea
+              id="workerConfig"
+              readonly
+              class="code-area w-full p-3 rounded-lg"
+            ></textarea>
+          </div>
 
-                <!-- Project Directory -->
-                <div>
-                    <label for="projectDir" class="block text-sm font-medium text-slate-700 mb-1">Project Directory (e.g., /opt/kuh)</label>
-                    <input type="text" id="projectDir" value="/opt/kuh" oninput="generateConfigs()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                </div>
-
-                <!-- VENV Bin Directory -->
-                <div>
-                    <label for="venvBin" class="block text-sm font-medium text-slate-700 mb-1">VENV Bin Directory (e.g., /opt/kuh/.venv/bin)</label>
-                    <input type="text" id="venvBin" value="/opt/kuh/.venv/bin" oninput="generateConfigs()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                </div>
-
-                <!-- Message Broker -->
-                <div>
-                    <label for="brokerService" class="block text-sm font-medium text-slate-700 mb-1">Message Broker Service</label>
-                    <select id="brokerService" onchange="generateConfigs()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                        <option value="rabbitmq-server.service">rabbitmq-server.service</option>
-                        <option value="redis.service">redis.service</option>
-                    </select>
-                </div>
-            </section>
-
-            <!-- Output Display -->
-            <section class="lg:col-span-2 space-y-8">
-
-                <!-- Worker Service Output -->
-                <div class="card p-6 rounded-xl">
-                    <h2 class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between items-center">
-                        <span>Worker Service (celery-worker.service)</span>
-                        <button onclick="copyToClipboard('workerConfig')" class="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-150 active:bg-blue-800">
-                            Copy to Clipboard
-                        </button>
-                    </h2>
-                    <textarea id="workerConfig" readonly class="code-area w-full p-3 rounded-lg"></textarea>
-                </div>
-
-                <!-- Beat Service Output -->
-                <div class="card p-6 rounded-xl">
-                    <h2 class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between items-center">
-                        <span>Beat Service (celerybeat-scheduler.service)</span>
-                        <button onclick="copyToClipboard('beatConfig')" class="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-150 active:bg-blue-800">
-                            Copy to Clipboard
-                        </button>
-                    </h2>
-                    <textarea id="beatConfig" readonly class="code-area w-full p-3 rounded-lg"></textarea>
-                </div>
-
-            </section>
-        </main>
+          <div class="card p-6 rounded-xl">
+            <h2
+              class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between"
+            >
+              <span>celerybeat-scheduler.service</span>
+              <button
+                onclick="copyToClipboard('beatConfig')"
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+              >
+                Copy
+              </button>
+            </h2>
+            <textarea
+              id="beatConfig"
+              readonly
+              class="code-area w-full p-3 rounded-lg"
+            ></textarea>
+          </div>
+        </section>
+      </main>
     </div>
 
     <script>
-        // Utility function to display a temporary copy message
-        function showCopyMessage() {
-            const msg = document.getElementById('copy-message');
-            msg.classList.remove('opacity-0');
-            msg.classList.add('opacity-100');
-            setTimeout(() => {
-                msg.classList.remove('opacity-100');
-                msg.classList.add('opacity-0');
-            }, 1500);
-        }
+      function showCopyMessage() {
+        const msg = document.getElementById("copy-message");
+        msg.classList.remove("opacity-0");
+        msg.classList.add("opacity-100");
+        setTimeout(() => {
+          msg.classList.remove("opacity-100");
+          msg.classList.add("opacity-0");
+        }, 1500);
+      }
 
-        // Function to copy text to clipboard
-        function copyToClipboard(elementId) {
-            const textarea = document.getElementById(elementId);
-            if (textarea && textarea.value) {
-                // Use document.execCommand('copy') for better iframe compatibility
-                textarea.select();
-                document.execCommand('copy');
-                showCopyMessage();
-            }
+      function copyToClipboard(id) {
+        const ta = document.getElementById(id);
+        if (ta && ta.value) {
+          ta.select();
+          document.execCommand("copy");
+          showCopyMessage();
         }
+      }
 
-        // Main function to generate the systemd configurations
-        function generateConfigs() {
-            const projectName = document.getElementById('projectName').value || 'kuh';
-            const linuxUser = document.getElementById('linuxUser').value || 'milch';
-            const projectDir = document.getElementById('projectDir').value || '/opt/kuh';
-            const venvBin = document.getElementById('venvBin').value || '/opt/kuh/.venv/bin';
-            const brokerService = document.getElementById('brokerService').value || 'rabbitmq-server.service';
-            
-            const celeryBin = `${venvBin}/celery`;
-            const logDir = '/var/log/celery';
-            const runDir = '/var/run/celery';
-            const djangoSettings = `${projectName}.settings`;
-            
-            // --- WORKER SERVICE CONFIG ---
-            const workerConfig = `[Unit]
-Description=Celery Worker for ${projectName}
-After=network.target ${brokerService}
-Requires=${brokerService}
+      function generateConfigs() {
+        const project =
+          document.getElementById("projectName").value || "nhwiren";
+        const user = document.getElementById("linuxUser").value || "nana";
+        const dir =
+          document.getElementById("projectDir").value || `/opt/${project}`;
+        const venv =
+          document.getElementById("venvBin").value || `${dir}/.venv/bin`;
+        const broker =
+          document.getElementById("brokerService").value ||
+          "rabbitmq-server.service";
+
+        const celeryBin = `${venv}/celery`;
+        const logDir = `/var/log/celery`;
+        const runDir = `/var/run/celery`;
+        const settings = `${project}.settings`;
+
+        const worker = `[Unit]
+Description=Celery Worker for ${project}
+After=network.target ${broker}
+Requires=${broker}
 
 [Service]
 Type=simple
-User=${linuxUser}
-Group=${linuxUser}
-WorkingDirectory=${projectDir}
-Environment="DJANGO_SETTINGS_MODULE=${djangoSettings}"
-ExecStart=${celeryBin} -A ${projectName} worker --loglevel=INFO --logfile=${logDir}/${projectName}-worker.log --pidfile=${runDir}/${projectName}-worker.pid
+User=${user}
+Group=${user}
+WorkingDirectory=${dir}
+Environment="DJANGO_SETTINGS_MODULE=${settings}"
+ExecStartPre=/bin/mkdir -p ${logDir} ${runDir}
+ExecStartPre=/bin/chown -R ${user}:${user} ${logDir} ${runDir}
+ExecStart=${celeryBin} -A ${project} worker --loglevel=INFO --logfile=${logDir}/${project}-worker.log --pidfile=${runDir}/${project}-worker.pid
 Restart=always
 LimitNOFILE=10000
 
 [Install]
 WantedBy=multi-user.target`;
 
-            // --- BEAT SERVICE CONFIG ---
-            const beatConfig = `[Unit]
-Description=Celery Beat Scheduler for ${projectName}
-After=network.target
-Requires=${brokerService}
+        const beat = `[Unit]
+Description=Celery Beat Scheduler for ${project}
+After=network.target ${broker}
+Requires=${broker}
 
 [Service]
 Type=simple
-User=${linuxUser}
-Group=${linuxUser}
-WorkingDirectory=${projectDir}
-Environment="DJANGO_SETTINGS_MODULE=${djangoSettings}"
-ExecStart=${celeryBin} -A ${projectName} beat --loglevel=INFO --logfile=${logDir}/${projectName}-beat.log --pidfile=${runDir}/${projectName}-beat.pid
+User=${user}
+Group=${user}
+WorkingDirectory=${dir}
+Environment="DJANGO_SETTINGS_MODULE=${settings}"
+ExecStartPre=/bin/mkdir -p ${logDir} ${runDir}
+ExecStartPre=/bin/chown -R ${user}:${user} ${logDir} ${runDir}
+ExecStart=${celeryBin} -A ${project} beat --loglevel=INFO --logfile=${logDir}/${project}-beat.log --pidfile=${runDir}/${project}-beat.pid
 Restart=always
 
 [Install]
 WantedBy=multi-user.target`;
 
-            document.getElementById('workerConfig').value = workerConfig;
-            document.getElementById('beatConfig').value = beatConfig;
-        }
+        document.getElementById("workerConfig").value = worker;
+        document.getElementById("beatConfig").value = beat;
+      }
 
-        // Initialize configuration on page load
-        window.onload = generateConfigs;
+      window.onload = generateConfigs;
     </script>
-</body>
+  </body>
 </html>
-
