@@ -71,6 +71,12 @@ if [ -z "$VENV_BIN" ]; then
   exit 1
 fi
 
+# --- Ensure Linux user can access project and venv ---
+echo "🔑 Ensuring ${LINUX_USER} can access project and virtualenv..."
+sudo chown -R ${LINUX_USER}:${LINUX_USER} "${PROJECT_DIR}/${PROJECT_NAME}" || true
+sudo chown -R ${LINUX_USER}:${LINUX_USER} "${VENV_BIN%/bin}" || true
+sudo chmod -R u+rwX,g+rX,o+rX "${VENV_BIN%/bin}" || true
+
 # --- Settings module flexibility ---
 read -p "Enter your Django settings module (default: ${PROJECT_NAME}.settings): " CUSTOM_SETTINGS
 if [ -n "$CUSTOM_SETTINGS" ]; then
@@ -143,7 +149,7 @@ fi
 sudo systemctl daemon-reload
 sudo systemctl reset-failed
 
-# Ensure log directory exists and has correct ownership (will be created by ExecStartPre too, but we create here for clarity)
+# Ensure log directory exists and has correct ownership
 if [ "${LOG_DIR}" = "/var/log/celery" ]; then
   sudo mkdir -p "${LOG_DIR}"
   sudo chown -R "${LINUX_USER}:${LINUX_USER}" "${LOG_DIR}"
@@ -240,4 +246,3 @@ else
 fi
 
 # End of script
-
