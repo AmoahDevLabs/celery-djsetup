@@ -77,20 +77,20 @@ Input Configuration: Fill out the four required fields, ensuring the paths are a
 
 1. Copy the generated Celery service files into the systemd directory
 ```
-sudo cp celery-baolog.service /etc/systemd/system/
-sudo cp celerybeat-baolog.service /etc/systemd/system/
+sudo cp celery-<project_name>.service /etc/systemd/system/
+sudo cp celerybeat-<project_name>.service /etc/systemd/system/
 ```
 
 2. Assign root ownership to the service files
 ```
-sudo chown root:root /etc/systemd/system/celery-baolog.service
-sudo chown root:root /etc/systemd/system/celerybeat-baolog.service
+sudo chown root:root /etc/systemd/system/celery-<project_name>.service
+sudo chown root:root /etc/systemd/system/celerybeat-<project_name>.service
 ```
 
 3. Apply proper read permissions for service files
 ```
-sudo chmod 644 /etc/systemd/system/celery-baolog.service
-sudo chmod 644 /etc/systemd/system/celerybeat-baolog.service
+sudo chmod 644 /etc/systemd/system/celery-<project_name>.service
+sudo chmod 644 /etc/systemd/system/celerybeat-<project_name>.service
 ```
 
 4. Create Celery runtime and log directories
@@ -115,17 +115,17 @@ sudo systemctl daemon-reload
 
 8. Enable the Celery services to start on boot
 ```
-sudo systemctl enable celery-baolog.service celerybeat-baolog.service
+sudo systemctl enable celery-<project_name>.service celerybeat-<project_name>.service
 ```
 
 9. Start both Celery services immediately
 ```
-sudo systemctl start celery-baolog.service celerybeat-baolog.service
+sudo systemctl start celery-<project_name>.service celerybeat-<project_name>.service
 ```
 
 10. Verify the status of both services
 ```
-sudo systemctl status celery-baolog.service celerybeat-baolog.service
+sudo systemctl status celery-<project_name>.service celerybeat-<project_name>.service
 ```
 
 
