@@ -54,7 +54,7 @@ The script will prompt you for four key pieces of information:
 
 The Celery systemd Config Generator is a visual utility that helps you quickly generate and debug service file content before deploying.
 
-### Use of the Canvas UI
+### Use of the Web UI
 
 Access the Generator: Open the directory with the index file,
 **`web/index.html`** in your Canvas environment.
@@ -69,7 +69,65 @@ Input Configuration: Fill out the four required fields, ensuring the paths are a
 
 - VENV Bin Directory (The path to the VENV's /bin folder).
 
-Select Broker: Choose either rabbitmq-server.service or redis.service (or manually adjust if you use a different broker).
+- Select Broker: Choose either rabbitmq-server.service or redis.service (or manually adjust if you use a different broker).
+- Run the appropriate permission to get the service to run
+
+### ⚙️ Running the Permission and Ownership Commands
+**DISCLAIMER: ⚠️ Please understand what each command does before running them. These commands directly modify system files and permissions on your Linux system.**
+
+1. Copy the generated Celery service files into the systemd directory
+```
+sudo cp celery-baolog.service /etc/systemd/system/
+sudo cp celerybeat-baolog.service /etc/systemd/system/
+```
+
+2. Assign root ownership to the service files
+```
+sudo chown root:root /etc/systemd/system/celery-baolog.service
+sudo chown root:root /etc/systemd/system/celerybeat-baolog.service
+```
+
+3. Apply proper read permissions for service files
+```
+sudo chmod 644 /etc/systemd/system/celery-baolog.service
+sudo chmod 644 /etc/systemd/system/celerybeat-baolog.service
+```
+
+4. Create Celery runtime and log directories
+```
+sudo mkdir -p /var/run/celery /var/log/celery
+```
+
+5. Set ownership of runtime and log directories
+```
+sudo chown -R <user:user> /var/run/celery /var/log/celery
+```
+
+6. Assign standard access permissions to directories
+```
+sudo chmod -R 755 /var/run/celery /var/log/celery
+```
+
+7. Reload the systemd manager configuration
+```
+sudo systemctl daemon-reload
+```
+
+8. Enable the Celery services to start on boot
+```
+sudo systemctl enable celery-baolog.service celerybeat-baolog.service
+```
+
+9. Start both Celery services immediately
+```
+sudo systemctl start celery-baolog.service celerybeat-baolog.service
+```
+
+10. Verify the status of both services
+```
+sudo systemctl status celery-baolog.service celerybeat-baolog.service
+```
+
 
 ### Output and Copy:
 
