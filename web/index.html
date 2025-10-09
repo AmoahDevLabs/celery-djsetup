@@ -22,6 +22,39 @@
         font-family: "Fira Code", "Consolas", monospace;
         min-height: 250px;
       }
+      /* Inline Toast */
+      .inline-toast {
+        display: none;
+        background-color: #16a34a;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-align: center;
+        animation: fadein 0.3s ease-in-out, fadeout 0.3s ease-in-out 1.8s;
+      }
+
+      @keyframes fadein {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeout {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
     </style>
   </head>
   <body>
@@ -31,14 +64,10 @@
           Celery systemd Config Generator
         </h1>
         <p class="text-slate-600">
-          Generate unit files for your Django project with safe defaults.
+          Generate unit files for your Django project with safe defaults and
+          auto-detection support.
         </p>
-        <p
-          id="copy-message"
-          class="text-sm font-semibold mt-3 text-emerald-600 opacity-0 transition-opacity duration-300"
-        >
-          Copied to clipboard!
-        </p>
+        <p style="color:blue"><a href="https://github.com/AmoahDevLabs">By: AmoahDevLabs</a></p>
       </header>
 
       <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -60,7 +89,11 @@
               oninput="generateConfigs()"
               class="w-full p-2 border rounded-lg"
             />
+            <p class="text-xs text-slate-500 mt-1">
+              Example: <code>nhwiren</code>
+            </p>
           </div>
+
           <div>
             <label
               for="linuxUser"
@@ -74,6 +107,7 @@
               class="w-full p-2 border rounded-lg"
             />
           </div>
+
           <div>
             <label
               for="projectDir"
@@ -86,7 +120,11 @@
               oninput="generateConfigs()"
               class="w-full p-2 border rounded-lg"
             />
+            <p class="text-xs text-slate-500 mt-1">
+              Auto-detects if left empty.
+            </p>
           </div>
+
           <div>
             <label
               for="venvBin"
@@ -99,7 +137,28 @@
               oninput="generateConfigs()"
               class="w-full p-2 border rounded-lg"
             />
+            <p class="text-xs text-slate-500 mt-1">
+              Defaults to <code>${projectDir}/.venv/bin</code>
+            </p>
           </div>
+
+          <div>
+            <label
+              for="djangoSettings"
+              class="block text-sm font-medium text-slate-700 mb-1"
+              >Django Settings File</label
+            >
+            <input
+              id="djangoSettings"
+              value="nhwiren.settings"
+              oninput="generateConfigs()"
+              class="w-full p-2 border rounded-lg"
+            />
+            <p class="text-xs text-slate-500 mt-1">
+              Leave blank for auto-detection.
+            </p>
+          </div>
+
           <div>
             <label
               for="brokerService"
@@ -111,27 +170,29 @@
               onchange="generateConfigs()"
               class="w-full p-2 border rounded-lg"
             >
-              <option value="rabbitmq-server.service">
-                rabbitmq-server.service
-              </option>
-              <option value="redis.service">redis.service</option>
+              <option value="rabbitmq-server.service">RabbitMQ</option>
+              <option value="redis.service">Redis</option>
             </select>
           </div>
         </section>
 
         <!-- Output -->
         <section class="lg:col-span-2 space-y-8">
+          <!-- Worker Config -->
           <div class="card p-6 rounded-xl">
             <h2
-              class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between"
+              class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between items-center"
             >
               <span>celery-worker.service</span>
-              <button
-                onclick="copyToClipboard('workerConfig')"
-                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-              >
-                Copy
-              </button>
+              <div class="text-right">
+                <div id="toast-worker" class="inline-toast">Copied!</div>
+                <button
+                  onclick="copyToClipboard('workerConfig', 'toast-worker')"
+                  class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                >
+                  Copy
+                </button>
+              </div>
             </h2>
             <textarea
               id="workerConfig"
@@ -140,17 +201,21 @@
             ></textarea>
           </div>
 
+          <!-- Beat Config -->
           <div class="card p-6 rounded-xl">
             <h2
-              class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between"
+              class="text-xl font-bold text-slate-700 border-b pb-2 mb-4 flex justify-between items-center"
             >
-              <span>celerybeat-scheduler.service</span>
-              <button
-                onclick="copyToClipboard('beatConfig')"
-                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-              >
-                Copy
-              </button>
+              <span>celery-beat.service</span>
+              <div class="text-right">
+                <div id="toast-beat" class="inline-toast">Copied!</div>
+                <button
+                  onclick="copyToClipboard('beatConfig', 'toast-beat')"
+                  class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                >
+                  Copy
+                </button>
+              </div>
             </h2>
             <textarea
               id="beatConfig"
@@ -163,29 +228,30 @@
     </div>
 
     <script>
-      function showCopyMessage() {
-        const msg = document.getElementById("copy-message");
-        msg.classList.remove("opacity-0");
-        msg.classList.add("opacity-100");
+      function showInlineToast(toastId) {
+        const toast = document.getElementById(toastId);
+        toast.style.display = "block";
         setTimeout(() => {
-          msg.classList.remove("opacity-100");
-          msg.classList.add("opacity-0");
-        }, 1500);
+          toast.style.display = "none";
+        }, 2000);
       }
 
-      function copyToClipboard(id) {
+      async function copyToClipboard(id, toastId) {
         const ta = document.getElementById(id);
         if (ta && ta.value) {
-          ta.select();
-          document.execCommand("copy");
-          showCopyMessage();
+          try {
+            await navigator.clipboard.writeText(ta.value);
+            showInlineToast(toastId);
+          } catch (err) {
+            alert("Failed to copy content.");
+          }
         }
       }
 
       function generateConfigs() {
         const project =
-          document.getElementById("projectName").value || "nhwiren";
-        const user = document.getElementById("linuxUser").value || "nana";
+          document.getElementById("projectName").value || "myproject";
+        const user = document.getElementById("linuxUser").value || "django";
         const dir =
           document.getElementById("projectDir").value || `/opt/${project}`;
         const venv =
@@ -193,11 +259,13 @@
         const broker =
           document.getElementById("brokerService").value ||
           "rabbitmq-server.service";
+        const settings =
+          document.getElementById("djangoSettings").value ||
+          `${project}.settings`;
 
         const celeryBin = `${venv}/celery`;
         const logDir = `/var/log/celery`;
         const runDir = `/var/run/celery`;
-        const settings = `${project}.settings`;
 
         const worker = `[Unit]
 Description=Celery Worker for ${project}
@@ -246,3 +314,4 @@ WantedBy=multi-user.target`;
     </script>
   </body>
 </html>
+
